@@ -3,6 +3,7 @@ import { getFlowData } from "@/lib/flow/data";
 import { isDashboardNetworkId, resolveDashboardNetwork } from "@/lib/network";
 import { isValidPeriod } from "@/lib/periods";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { withApiTrace } from "@/lib/telemetry/tracing";
 
 export const dynamic = "force-dynamic";
 
@@ -37,4 +38,4 @@ export async function handleFlowRequest(
   }
 }
 
-export const GET = (request: Request) => handleFlowRequest(request);
+export const GET = withApiTrace("/api/v1/flow", handleFlowRequest);

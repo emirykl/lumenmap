@@ -225,6 +225,10 @@ Do not commit `gcp-sa.json` or `.env.local`. Both are gitignored. Each contribut
 
 ## API
 
+Public API request tracing can be enabled for local debugging. See
+[OpenTelemetry tracing](docs/tracing.md) for console and OTLP setup, overhead,
+and the span attribute security policy.
+
 Machine-readable OpenAPI 3.1 for the public routes is served at [`/api/openapi.json`](/api/openapi.json). Import it into Swagger Editor to inspect parameters and response shapes aligned with the Zod validators used at runtime.
 
 ### Cache backends

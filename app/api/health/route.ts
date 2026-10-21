@@ -12,6 +12,7 @@ import {
 } from "@/lib/hubble/bytes-billed-telemetry";
 import { getAllEntities } from "@/lib/entities/registry";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { withApiTrace } from "@/lib/telemetry/tracing";
 
 export const dynamic = "force-dynamic";
 
@@ -215,7 +216,7 @@ function checkBytesBilled(): BytesBilledCheckResult {
 
 // ── Handler ────────────────────────────────────────────────────────────────
 
-export async function GET(request: Request) {
+async function handleHealthRequest(request: Request) {
   const limited = enforceRateLimit(request, "health");
   if (limited) return limited;
 
@@ -295,3 +296,5 @@ export async function GET(request: Request) {
     },
   );
 }
+
+export const GET = withApiTrace("/api/health", handleHealthRequest);

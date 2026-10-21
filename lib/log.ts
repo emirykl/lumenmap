@@ -1,3 +1,5 @@
+import { trace } from "@opentelemetry/api";
+
 export type LogLevel = "info" | "warn" | "error";
 export type ErrorClass =
   | "timeout"
@@ -11,6 +13,7 @@ export interface LogEntry {
   level: LogLevel;
   event: string;
   correlationId: string;
+  traceId?: string;
   durationMs?: number;
   period?: string;
   queryName?: string;
@@ -40,12 +43,21 @@ export function endTimer(start: [number, number]): number {
 }
 
 function emit(entry: LogEntry): void {
-  const line = JSON.stringify(entry);
+  const traceId = activeTraceId();
+  const line = JSON.stringify({
+    ...entry,
+    ...(traceId ? { traceId } : {}),
+  });
   if (entry.level === "error") {
     console.error(line);
   } else {
     console.log(line);
   }
+}
+
+export function activeTraceId(): string | undefined {
+  const activeSpan = trace.getActiveSpan();
+  return activeSpan?.isRecording() ? activeSpan.spanContext().traceId : undefined;
 }
 
 export function logInfo(fields: Omit<LogEntry, "timestamp" | "level">): void {

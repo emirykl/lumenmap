@@ -1,5 +1,6 @@
-import { GET } from "./_handler";
+import { GET as handleGet } from "./_handler";
+import { withApiTrace } from "@/lib/telemetry/tracing";
 
 export const dynamic = "force-dynamic";
 
-export { GET };
+export const GET = withApiTrace("/api/v1/dapps", handleGet);

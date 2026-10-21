@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createCorrelationId, logInfo } from "@/lib/log";
+import { activeTraceId, createCorrelationId, logInfo } from "@/lib/log";
 
 export type RateLimitConfig = {
   /** Max requests allowed in the window. */
@@ -169,6 +169,7 @@ export function enforceRateLimit(
     event: "rate_limit.throttled",
     correlationId: createCorrelationId(),
   });
+  const traceId = activeTraceId();
   // Structured throttle details without logging raw IPs or auth headers.
   console.log(
     JSON.stringify({
@@ -179,6 +180,7 @@ export function enforceRateLimit(
       method: request.method,
       limit: result.limit,
       retryAfterSeconds: result.retryAfterSeconds,
+      ...(traceId ? { traceId } : {}),
     }),
   );
 

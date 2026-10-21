@@ -194,9 +194,9 @@ describe("parseActivityPeriod", () => {
 });
 
 describe("GET /api/activity and /api/v1/activity", () => {
-  test("legacy and v1 routes share the same handler", () => {
+  test("v1 route wraps the shared handler for tracing", () => {
     assert.equal(legacyGET, sharedGET);
-    assert.equal(v1GET, sharedGET);
+    assert.notEqual(v1GET, sharedGET);
   });
 
   test("returns 200 and defaults to 1d when period is missing", async () => {
@@ -271,7 +271,6 @@ describe("GET /api/activity and /api/v1/activity", () => {
       fetchActivityData,
     );
 
-    assert.equal(legacyGET, v1GET);
     assert.equal(injectedLegacy.status, 200);
     assert.equal(injectedV1.status, 200);
     assert.deepEqual(await injectedLegacy.json(), await injectedV1.json());
