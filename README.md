@@ -182,6 +182,21 @@ npm install
 npm run dev
 ```
 
+### Import an address research list
+
+Open the dashboard's **Watchlist** and choose **Import CSV/TXT**. A CSV may have
+an `address` header in any column; without that header, the first column is
+used. TXT files use one address per line. Account (`G…`) and contract (`C…`)
+addresses are accepted. Other columns are ignored. See
+[`data/fixtures/watchlist-import.csv`](data/fixtures/watchlist-import.csv) for a
+sample file.
+
+The browser imports valid rows into its local watchlist, up to 20 total entries.
+Invalid, missing, duplicate, and over-limit rows are skipped with row numbers
+and reasons. **Clear imported** removes imported entries while keeping manually
+added entries. Files must be CSV or TXT and at most 1 MB; no upload is sent to
+the server.
+
 Live mode still requires GCP credentials. Setting `LUMENMAP_DATA_SOURCE=fixture` in production (`NODE_ENV` or `VERCEL_ENV`) fails closed.
 
 What you can explore in fixture mode (deterministic rows from `lib/fixtures/raw-data.ts` and `lib/fixtures/timeseries.ts`, scaled per period):

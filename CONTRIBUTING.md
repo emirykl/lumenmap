@@ -16,6 +16,7 @@ Thank you for your interest in contributing. This guide covers everything you ne
 - [Available commands](#available-commands)
 - [Making changes](#making-changes)
 - [Keyboard shortcuts](#keyboard-shortcuts)
+- [Address list import fixture](#address-list-import-fixture)
 - [Entity registry](#entity-registry)
 - [Issue sizing (Wave estimate guide)](#issue-sizing-wave-estimate-guide)
 - [Branch and PR workflow](#branch-and-pr-workflow)
@@ -70,6 +71,16 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000). The dashboard loads immediately using fixture data — no GCP setup required.
 
 ---
+
+## Address list import fixture
+
+Use [`data/fixtures/watchlist-import.csv`](data/fixtures/watchlist-import.csv)
+to check the dashboard watchlist's **Import CSV/TXT** control in fixture mode.
+The CSV format accepts an `address` header in any column, or uses the first
+column when there is no header. TXT accepts one Stellar `G…` or `C…` address per
+line. Other CSV columns are ignored. The sample includes two accepted rows and
+one invalid row so the skip message is easy to verify. The watchlist holds at
+most 20 entries, and **Clear imported** removes only entries added by import.
 
 ## Fixture mode vs live mode
 

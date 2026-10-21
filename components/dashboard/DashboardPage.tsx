@@ -26,6 +26,7 @@ import { DashboardSearch } from "@/components/dashboard/DashboardSearch";
 import { ComparisonPanel } from "@/components/dashboard/ComparisonPanel";
 import { IssuerIntelligence } from "@/components/dashboard/IssuerIntelligence";
 import { SavedViewsControls } from "@/components/dashboard/SavedViewsControls";
+import { WatchlistPanel } from "@/components/dashboard/WatchlistPanel";
 import { SnapshotBanner } from "@/components/dashboard/SnapshotBanner";
 import { SnapshotShareControls } from "@/components/dashboard/SnapshotShareControls";
 import { NetworkSelector } from "@/components/dashboard/NetworkSelector";
@@ -157,6 +158,8 @@ function DashboardContent() {
 
       {/* KPIs - quick overview */}
       <KpiCards />
+
+      {readOnly ? null : <WatchlistPanel />}
 
       <ProtocolHealthScorecards />
 

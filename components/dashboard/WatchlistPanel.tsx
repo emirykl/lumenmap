@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "@/components/dashboard/DashboardProvider";
 import { Button } from "@/components/ui/button";
 import { formatActivityDelta, resolveWatchlistBadge } from "@/lib/watchlist-delta";
+import { clearImportedEntries, importWatchlistText, type ImportSkip } from "@/lib/watchlist-import";
 import {
   WATCHLIST_LIMIT,
   addWatchlistEntry,
@@ -23,6 +24,9 @@ export function WatchlistPanel() {
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
+  const [importStatus, setImportStatus] = useState("");
+  const [skipped, setSkipped] = useState<ImportSkip[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -63,6 +67,10 @@ export function WatchlistPanel() {
   }, [ready, data, entries]);
 
   const atLimit = entries.length >= WATCHLIST_LIMIT;
+  const skipCounts = skipped.reduce<Record<string, number>>((counts, item) => {
+    counts[item.reason] = (counts[item.reason] ?? 0) + 1;
+    return counts;
+  }, {});
 
   const handleAdd = () => {
     const result = addWatchlistEntry({ address, label, entries });
@@ -74,6 +82,34 @@ export function WatchlistPanel() {
     setLabel("");
     setError("");
     setEntries(result.entries);
+  };
+
+  const handleImport = async (file: File | null) => {
+    if (!file) return;
+    const format = file.name.toLowerCase().endsWith(".csv")
+      ? "csv"
+      : file.name.toLowerCase().endsWith(".txt")
+        ? "txt"
+        : null;
+    if (!format || file.size > 1_000_000) {
+      setImportStatus("Choose a CSV or TXT file no larger than 1 MB.");
+      setSkipped([]);
+      return;
+    }
+    try {
+      const result = importWatchlistText(await file.text(), format, entries);
+      const overLimit = result.skipped.filter((item) => item.reason.includes("Watchlist limit")).length;
+      setEntries(result.entries);
+      setSkipped(result.skipped);
+      setImportStatus(
+        `Imported ${result.imported} address(es); skipped ${result.skipped.length} row(s). ` +
+          `Watchlist: ${result.entries.length}/${WATCHLIST_LIMIT}.` +
+          (overLimit ? ` ${overLimit} row(s) exceeded the ${WATCHLIST_LIMIT}-entry limit.` : ""),
+      );
+    } catch {
+      setImportStatus("Could not read that file. Try another CSV or TXT file.");
+      setSkipped([]);
+    }
   };
 
   return (
@@ -91,6 +127,49 @@ export function WatchlistPanel() {
         Track up to {WATCHLIST_LIMIT} accounts or contracts. Counts follow the
         active period{flowViewEnabled ? "; opening one also centers Flow ego." : "."}
       </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
+          Import CSV/TXT
+        </Button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".csv,.txt,text/csv,text/plain"
+          aria-label="Address list file"
+          className="sr-only"
+          onChange={(event) => {
+            void handleImport(event.target.files?.[0] ?? null);
+            event.target.value = "";
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          disabled={!entries.some((entry) => entry.origin === "import")}
+          onClick={() => {
+            const count = entries.filter((entry) => entry.origin === "import").length;
+            setEntries(clearImportedEntries(entries));
+            setSkipped([]);
+            setImportStatus(`Cleared ${count} imported address(es).`);
+          }}
+        >
+          Clear imported
+        </Button>
+        <span className="text-xs text-zinc-500">Up to {WATCHLIST_LIMIT} total; address column only.</span>
+      </div>
+      {importStatus ? <p role="status" className="mt-2 text-xs text-zinc-300">{importStatus}</p> : null}
+      {skipped.length > 0 ? (
+        <div className="mt-2 text-xs text-amber-200">
+          <p>Skipped rows by reason: {Object.entries(skipCounts).map(([reason, count]) => `${reason} (${count})`).join("; ")}.</p>
+          <ul className="list-inside list-disc">
+            {skipped.slice(0, 10).map((item) => (
+              <li key={item.row}>Row {item.row}: {item.reason}</li>
+            ))}
+          </ul>
+          {skipped.length > 10 ? <p>And {skipped.length - 10} more skipped rows.</p> : null}
+        </div>
+      ) : null}
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="min-w-0 flex-1 text-xs text-zinc-400" htmlFor="watchlist-address">

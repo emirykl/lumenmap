@@ -1,6 +1,7 @@
 import { getFixtureRawActivity } from "@/lib/fixtures/raw-data";
-import { getFixtureTimeseries } from "@/lib/fixtures/timeseries";
+import { getFixtureTimeseriesRawRows } from "@/lib/fixtures/timeseries-raw";
 import { resolvePeriod } from "@/lib/periods";
+import { addDays, addHours, startOfDay, startOfHour } from "date-fns";
 import type { Period, TimeseriesBucket, TreemapNode } from "@/lib/types";
 
 export type WatchlistDelta = {
@@ -106,6 +107,31 @@ function fixtureEntityOps(address: string, period: Period): number {
   return accountOps + contractOps;
 }
 
+function fixtureWindowOps(period: Period, now: Date): number {
+  const { start, end } = resolvePeriod(period, now);
+  const hourly = period === "1d";
+  const totals = new Map<string, number>();
+  for (const row of getFixtureTimeseriesRawRows(period, start, end)) {
+    const key = row.bucket_time.slice(0, hourly ? 13 : 10);
+    totals.set(key, (totals.get(key) ?? 0) + row.op_count);
+  }
+
+  let total = 0;
+  let buckets = 0;
+  let current = hourly ? startOfHour(start) : startOfDay(start);
+  while (current <= end) {
+    const include = hourly
+      ? current <= now || buckets === 0 || current <= addHours(now, 1)
+      : current <= startOfDay(now) || buckets === 0 || current <= now;
+    if (include) {
+      total += totals.get(current.toISOString().slice(0, hourly ? 13 : 10)) ?? 0;
+      buckets += 1;
+    }
+    current = hourly ? addHours(current, 1) : addDays(current, 1);
+  }
+  return total;
+}
+
 /**
  * Fixture mode delta. Entity counts come from the fixture activity rows
  * (scaled by the period multiplier). The previous equal-length window is
@@ -118,10 +144,8 @@ export function fixtureWatchlistDelta(
   now = new Date(),
 ): WatchlistDelta {
   const opCount = fixtureEntityOps(address, period);
-  const currentTotal = sumBucketOperations(getFixtureTimeseries(period, now).buckets);
-  const previousTotal = sumBucketOperations(
-    getFixtureTimeseries(period, previousEqualAnchor(period, now)).buckets,
-  );
+  const currentTotal = fixtureWindowOps(period, now);
+  const previousTotal = fixtureWindowOps(period, previousEqualAnchor(period, now));
   const previousOps = scalePreviousOps(opCount, currentTotal, previousTotal);
 
   return {

@@ -30,6 +30,7 @@ export type WatchlistEntry = {
   address: string;
   label: string;
   kind: WatchlistKind;
+  origin?: "import";
   createdAt: string;
   updatedAt: string;
   /** Last operation count observed for `lastSeenPeriod`, if any. */
@@ -80,6 +81,7 @@ function isEntry(value: unknown): value is WatchlistEntry {
     typeof entry.address === "string" &&
     typeof entry.label === "string" &&
     (entry.kind === "account" || entry.kind === "contract") &&
+    (entry.origin === undefined || entry.origin === "import") &&
     resolveWatchlistKind(entry.address) === entry.kind
   );
 }
@@ -118,6 +120,7 @@ export function writeWatchlistToStorage(
 export function addWatchlistEntry(input: {
   address: string;
   label?: string;
+  origin?: "import";
   entries: WatchlistEntry[];
   now?: string;
 }): { ok: true; entries: WatchlistEntry[]; added: WatchlistEntry } | { ok: false; error: string } {
@@ -144,6 +147,7 @@ export function addWatchlistEntry(input: {
     address,
     label: provided || defaultWatchlistLabel(address),
     kind,
+    ...(input.origin ? { origin: input.origin } : {}),
     createdAt: stamp,
     updatedAt: stamp,
   };
