@@ -38,7 +38,7 @@ Single-page dashboard. Data comes from [Hubble](https://developers.stellar.org/d
 - Dashboard search across loaded accounts, contracts, assets, protocols, and categories
 - Protocol activity ranking grouped by protocol, with entity labels for known wallets and contracts
 - Per-asset payment-volume panel (native units, issuers kept distinct)
-- Detail panel with share, activity count, protocol, and address
+- Detail panel with share, activity count, protocol, address, and approximate first-seen/age context for accounts and contracts
 - Fixture mode for credential-free local runs on deterministic sample data (not live mainnet data)
 - Responsive dark layout
 
@@ -145,6 +145,10 @@ explicit disabled message). Ops / transactions remain available.
 | Metric | Source |
 | --- | --- |
 | Live protocol TVL balances and prices | Hubble/venue adapters with a versioned price pipeline |
+
+### Entity first-seen context
+
+Selecting an account or contract loads `GET /api/v1/entities/first-seen?type=account|contract&id=...&network=mainnet|testnet` independently of dashboard activity. The response gives the earliest observed Hubble operation for accounts or hourly contract fee record for contracts. This is **not a creation timestamp**: earlier activity may be absent, Hubble ingestion can lag, and contract times are rounded to an hour. The panel labels age as approximate and shows “Unavailable” if no record is found or the optional lookup fails. This lookup is limited to the lower of the configured BigQuery maximum bytes billed and 1 GB, with a 24-hour positive cache and a 15-minute unavailable cache. Fixture entities use fixed sample dates.
 
 ---
 

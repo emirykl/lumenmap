@@ -76,6 +76,8 @@ queries registered in `queryRegistry` are listed below.
 
 Every entry of `queryRegistry` with the columns it would fail on if removed.
 
+The on-demand entity first-seen lookup in `lib/entities/first-seen-data.ts` is separate from the activity query registry. It reads `closed_at` and `op_source_account` from `enriched_history_operations` for accounts, or `hour_agg` and `contract_id` from `hourly_soroban_fee_agg_contract` for contracts. Both queries use a bounded time predicate and `maximumBytesBilled`; query failures leave the optional panel field unavailable.
+
 | Query | Table | Columns | Params |
 | --- | --- | --- | --- |
 | `categoryQuery` | `enriched_history_operations` | `type_string`, `asset_type`, `amount`, `closed_at` | `start`, `end` |

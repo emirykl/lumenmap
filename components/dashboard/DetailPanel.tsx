@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,38 @@ import { buildContractFunctionBreakdown } from "@/lib/entities/contract-function
 import { ContractFunctionBarChart } from "@/components/dashboard/ContractFunctionBarChart";
 import { getMetricUnit } from "@/lib/metrics/units";
 import { formatNumber, formatPercent } from "@/lib/utils";
+import { formatEntityAge, formatFirstSeen, type FirstSeenContext } from "@/lib/entities/first-seen";
+
+function FirstSeenDetails({ id, type, network }: {
+  id: string;
+  type: "account" | "contract";
+  network: "mainnet" | "testnet";
+}) {
+  const { data, isPending } = useQuery<FirstSeenContext>({
+    queryKey: ["first-seen", network, type, id],
+    queryFn: async () => {
+      const params = new URLSearchParams({ id, type, network });
+      const response = await fetch(`/api/v1/entities/first-seen?${params}`);
+      if (!response.ok) throw new Error("First-seen lookup failed");
+      return response.json() as Promise<FirstSeenContext>;
+    },
+    retry: false,
+    staleTime: 15 * 60_000,
+  });
+  const value = isPending ? "Loading…" : formatFirstSeen(data?.firstSeenAt ?? null);
+  const age = isPending ? "Loading…" : formatEntityAge(data?.firstSeenAt ?? null);
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div><p className="text-xs text-zinc-500">First seen</p><p className="text-sm text-zinc-200">{value}</p></div>
+        <div><p className="text-xs text-zinc-500">Age</p><p className="text-sm text-zinc-200">{age}</p></div>
+      </div>
+      <p className="mt-2 text-xs text-zinc-500">
+        Approximate age since earliest observed activity, not account or contract creation. Hubble data may lag.
+      </p>
+    </div>
+  );
+}
 
 export function DetailPanel({ onViewFlow }: { onViewFlow?: (account: string) => void }) {
   const {
@@ -24,6 +57,8 @@ export function DetailPanel({ onViewFlow }: { onViewFlow?: (account: string) => 
     isLoading,
     setTreemapView,
     setActiveLevelPath,
+    network,
+    readOnly,
   } = useDashboard();
 
   useEffect(() => {
@@ -211,6 +246,11 @@ export function DetailPanel({ onViewFlow }: { onViewFlow?: (account: string) => 
               </Button>
             )}
           </div>
+        ) : null}
+
+        {address && !readOnly &&
+        (selectedNode.meta?.type === "account" || selectedNode.meta?.type === "contract") ? (
+          <FirstSeenDetails id={address} type={selectedNode.meta.type} network={network} />
         ) : null}
 
         {selectedNode.meta?.eventType ? (
