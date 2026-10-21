@@ -32,6 +32,8 @@
     "test:mappings": "npx tsx scripts/test-category-mappings.mjs",
     "test:coverage": "node scripts/test-coverage-calculation.mjs",
     "test:unit": "vitest run",
+    "entities:validate": "node scripts/validate-entities.mjs",
+    "test:entities": "node --test scripts/validate-entities.test.mjs",
     "test:fixtures": "npx tsx scripts/verify-fixture-mode.ts",
     "test:e2e:flow": "FLOW_FIXTURE_MODE=1 playwright test e2e/flow.spec.ts"
   },
@@ -67,6 +69,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.5",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "yaml": "^2.9.1"
   }
 }

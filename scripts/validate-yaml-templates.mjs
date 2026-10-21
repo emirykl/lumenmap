@@ -111,6 +111,22 @@ function validateFeatureRequest() {
   logSuccess("feature_request.yml validation passed (verifiable outcome required)");
 }
 
+function validateEntityLabelProposal() {
+  const filePath = path.join(TEMPLATES_DIR, "entity_label_proposal.yml");
+  const parsed = YAML.parse(fs.readFileSync(filePath, "utf8"));
+  if (parsed.name !== "Entity Label Proposal") {
+    throw new Error("entity_label_proposal.yml must be named 'Entity Label Proposal'");
+  }
+  const requiredIds = ["address", "name", "category", "protocol", "proof_links", "change_reason"];
+  for (const id of requiredIds) {
+    const field = parsed.body?.find((item) => item.id === id);
+    if (!field || field.validations?.required !== true) {
+      throw new Error(`entity_label_proposal.yml requires '${id}'`);
+    }
+  }
+  logSuccess("entity_label_proposal.yml validation passed (address, label, and proof required)");
+}
+
 function main() {
   console.log("\n📋 Validating GitHub Issue Templates...");
   let errors = 0;
@@ -131,6 +147,13 @@ function main() {
 
   try {
     validateFeatureRequest();
+  } catch (err) {
+    logError(err.message);
+    errors++;
+  }
+
+  try {
+    validateEntityLabelProposal();
   } catch (err) {
     logError(err.message);
     errors++;

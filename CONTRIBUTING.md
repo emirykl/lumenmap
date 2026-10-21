@@ -207,6 +207,8 @@ scripts/
 | `npm run smoke` | Post-deploy smoke check |
 | `npm run test:hubble` | Smoke-tests all BigQuery queries (requires GCP) |
 | `npm run sync:directory` | Pulls entity labels from Stellar Expert |
+| `npm run entities:validate` | Check curated entity addresses and required fields |
+| `npm run test:entities` | Exercise valid and invalid entity fixtures |
 
 ---
 
@@ -247,7 +249,7 @@ checklist to paste into your PR.
 
 ### Updating entity labels
 
-To add or correct a wallet or contract label, edit [`data/entities.json`](data/entities.json) directly:
+After gathering the [proposal evidence](#proposing-a-label), add or correct a wallet or contract label in [`data/entities.json`](data/entities.json):
 
 ```json
 {
@@ -293,6 +295,14 @@ LumenMap labels addresses using two sources, merged at startup:
 Entries in `entities.json` override `directory.json` for the same address. Use `entities.json` for corrections and additions that Stellar Expert does not yet carry.
 
 Valid categories: `defi`, `exchange`, `wallet`, `anchor`, `issuer`, `other`.
+
+### Proposing a label
+
+Open an [Entity Label Proposal](.github/ISSUE_TEMPLATE/entity_label_proposal.yml) issue before changing `data/entities.json`, or include the same evidence in the entity review section of your PR. Provide the full G account or C contract address and network, proposed `name`, `category`, and `protocol`, an explorer link for the exact address, and a public source controlled by the operator (official site, docs, or signed announcement) that connects that address to the name. Explain corrections to existing labels. Reviewers check the links and the address-to-name relationship manually; the validator only checks registry structure.
+
+Use the public name supported by the evidence, not a vanity name or an inferred owner. A proposal can be rejected for an invalid or duplicate address, missing fields, unsupported category, broken or unrelated proof links, a name that the sources do not verify, or a correction without a reason. A directory label alone is not proof of control. Do not add a label while ownership is ambiguous.
+
+Keep `data/entities.json` as an address-keyed object with non-empty `name`, `category`, and `protocol` strings. Run `npm run entities:validate` before submitting. The command accepts an optional path to validate another JSON file, for example `npm run entities:validate -- path/to/entities.json`. It checks 56-character uppercase base32 G/C address shape; human review establishes address ownership and on-chain provenance.
 
 ---
 

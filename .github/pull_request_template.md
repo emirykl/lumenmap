@@ -30,6 +30,9 @@ npm run test:hubble
 # Entity / directory label sync
 npm run sync:directory
 
+# Curated entity registry changes
+npm run entities:validate
+
 # Manual UI check
 npm run dev
 ```
@@ -37,6 +40,16 @@ npm run dev
 Paste the commands you ran and the outcome:
 
 -
+
+## Entity label review _(required for `data/entities.json` changes)_
+
+- Address and network:
+- Proposed name, category, and protocol:
+- Explorer link for the exact address:
+- Public owner-controlled proof linking the address to the name:
+- [ ] Address is new, or the reason for correcting an existing label is explained
+- [ ] Name and category match the linked proof; no unverifiable vanity name
+- [ ] `npm run entities:validate` passes
 
 ## UI evidence _(optional — UI / layout changes only)_
 

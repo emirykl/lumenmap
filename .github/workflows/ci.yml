@@ -16,6 +16,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run test:issues
+      - run: npm run test:entities
+      - run: npm run entities:validate
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test

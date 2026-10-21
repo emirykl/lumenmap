@@ -632,6 +632,8 @@ Known wallets and contracts are in [`data/entities.json`](data/entities.json):
 
 Add rows to label more actors in the treemap.
 
+Community labels need public address-to-name proof. See the [proposal and review criteria](CONTRIBUTING.md#proposing-a-label) before editing the registry, and run `npm run entities:validate` on changes.
+
 ```bash
 npm run sync:directory
 ```

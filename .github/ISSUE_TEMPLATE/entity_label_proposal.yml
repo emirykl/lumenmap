@@ -1,0 +1,72 @@
+name: Entity Label Proposal
+description: Propose or correct a verified wallet or contract label in data/entities.json.
+title: "[Entity]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provide public evidence for the address-to-name relationship. Reviewers reject unverifiable vanity names. See the [entity registry criteria](../../CONTRIBUTING.md#entity-registry).
+
+  - type: input
+    id: address
+    attributes:
+      label: Stellar address
+      description: Full G account or C contract address, including the network (mainnet or testnet).
+      placeholder: "G... or C... (mainnet/testnet)"
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: Proposed display name
+      description: The exact public name supported by the proof links.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options: ["defi", "exchange", "wallet", "anchor", "issuer", "other"]
+    validations:
+      required: true
+
+  - type: input
+    id: protocol
+    attributes:
+      label: Protocol or organization
+      description: Name of the operator or project associated with this address.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proof_links
+    attributes:
+      label: Proof links
+      description: Link to an on-chain explorer record for this exact address and a public, owner-controlled source linking the address to the proposed name (official site, docs, or signed announcement). Explain how each link supports the claim.
+      placeholder: |
+        Explorer link: https://...
+        Official source: https://...
+        Relationship shown: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: change_reason
+    attributes:
+      label: Reason for addition or correction
+      description: For corrections, state the current label and why it should change.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: review_checklist
+    attributes:
+      label: Proposal checklist
+      options:
+        - label: I checked that the address is not already labeled in data/entities.json (or explained the correction above).
+          required: true
+        - label: The proof links are public and show the exact address-to-name relationship.
+          required: true
